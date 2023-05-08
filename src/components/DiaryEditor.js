@@ -58,7 +58,6 @@ const DiaryEditor = () => {
         onCreate(date,content,emotion);
         navigate("/",{replace:true});
     }
-
     
     return (
         <div className="DiaryEditor">
