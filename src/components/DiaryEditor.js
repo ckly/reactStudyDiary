@@ -1,4 +1,4 @@
-import { useState,useRef, useContext } from "react";
+import { useState,useRef, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import MyButton from "./MyButton";
@@ -38,31 +38,46 @@ const getStringDate = (date) => {
     return date.toISOString().slice(0,10);
 }
 
-const DiaryEditor = () => {
+const DiaryEditor = ({isEdit,originData}) => {
     const contentRef = useRef();
     const [content, setContent] = useState("");
     const [emotion, setEmotion] = useState(3);
     const [date, setDate] = useState(getStringDate(new Date()));
-    const {onCreate} = useContext(DiaryDispatchContext);
+    const {onCreate, onEdit} = useContext(DiaryDispatchContext);
 
     const handleClickEmotion = (emotion) => {
         setEmotion(emotion);
     }
     const navigate = useNavigate();
 
+    useEffect(()=>{
+        if(isEdit){
+            setDate(getStringDate(new Date(parseInt(originData.date))));
+            setEmotion(originData.emotion);
+            setContent(originData.content);
+        }
+    },[isEdit,originData]);
+
     const handleSubmit = () => {
         if(content.length < 1){
             contentRef.current.focus();
             return;
         }
-        onCreate(date,content,emotion);
+        if(window.confirm(isEdit ? "Modify?" : "New?")){
+            if(!isEdit){
+                onCreate(date,content,emotion);
+            }else{
+                onEdit(originData.id,date,content,emotion);
+            }
+        }
+        
         navigate("/",{replace:true});
     }
     
     return (
         <div className="DiaryEditor">
            <MyHeader 
-            headText={"new D write"}
+            headText={isEdit ? "Modify":"New"}
             leftChild={<MyButton text={"< Back"} onClick={()=>navigate(-1)} />}
            />
            <div>
